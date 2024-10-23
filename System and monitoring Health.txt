@@ -1,0 +1,57 @@
+Problem Statement-2
+A) System health monitoring Script
+
+#!/bin/bash
+
+# Define thresholds
+CPU_THRESHOLD=80
+MEM_THRESHOLD=80
+DISK_THRESHOLD=80
+
+# Log file location
+LOG_FILE="/var/log/system_health.log"
+
+# Get current date and time
+TIMESTAMP=$(date +"%Y-%m-%d %H:%M:%S")
+
+# Function to check CPU usage
+check_cpu() {
+    CPU_USAGE=$(top -bn1 | grep "Cpu(s)" | awk '{print $2 + $4}')
+    CPU_USAGE=${CPU_USAGE%.*} # Convert to integer
+
+    if [ "$CPU_USAGE" -gt "$CPU_THRESHOLD" ]; then
+        echo "$TIMESTAMP - CPU usage is high: $CPU_USAGE%" | tee -a $LOG_FILE
+    fi
+}
+
+# Function to check memory usage
+check_memory() {
+    MEM_USAGE=$(free | grep Mem | awk '{print $3/$2 * 100.0}')
+    MEM_USAGE=${MEM_USAGE%.*} # Convert to integer
+
+    if [ "$MEM_USAGE" -gt "$MEM_THRESHOLD" ]; then
+        echo "$TIMESTAMP - Memory usage is high: $MEM_USAGE%" | tee -a $LOG_FILE
+    fi
+}
+
+# Function to check disk usage
+check_disk() {
+    DISK_USAGE=$(df / | grep / | awk '{print $5}' | sed 's/%//g')
+
+    if [ "$DISK_USAGE" -gt "$DISK_THRESHOLD" ]; then
+        echo "$TIMESTAMP - Disk space is low: $DISK_USAGE%" | tee -a $LOG_FILE
+    fi
+}
+
+# Function to check running processes
+check_processes() {
+    TOP_PROCESS=$(ps -eo pid,ppid,cmd,%mem,%cpu --sort=-%cpu | head -n 2)
+    echo "$TIMESTAMP - Top CPU consuming process:" | tee -a $LOG_FILE
+    echo "$TOP_PROCESS" | tee -a $LOG_FILE
+}
+
+# Run all checks
+check_cpu
+check_memory
+check_disk
+check_processes

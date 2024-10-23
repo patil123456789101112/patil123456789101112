@@ -1,0 +1,30 @@
+Problem Statement:-2
+
+d) Application Health Checker
+
+
+
+#!/bin/bash
+
+# Define the application URL
+APP_URL="http://your-application-url.com"
+
+# Define log file for uptime status
+LOG_FILE="/var/log/app_uptime.log"
+
+# Get the current timestamp
+TIMESTAMP=$(date +"%Y-%m-%d %H:%M:%S")
+
+# Function to check the application's status
+check_uptime() {
+    HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" $APP_URL)
+
+    if [ "$HTTP_STATUS" -eq 200 ]; then
+        echo "$TIMESTAMP - Application is UP. Status code: $HTTP_STATUS" | tee -a $LOG_FILE
+    else
+        echo "$TIMESTAMP - Application is DOWN. Status code: $HTTP_STATUS" | tee -a $LOG_FILE
+    fi
+}
+
+# Run the check
+check_uptime
